@@ -112,7 +112,7 @@
 
                     lines.forEach(line => {
                         if (line.trim() !== "") {
-                            let pdfPath = "http://192.168.107.13:8000/" + line.trim();
+                            let pdfPath = line.trim(); 
                             let fileName = line.split("/").pop();
 
                             let li = document.createElement("li");
