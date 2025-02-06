@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mode opératoire Produits</title>
+    <style>
+        /* Centrage global */
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Conteneur principal */
+        #content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            min-width: 500px;
+            width: 90%;
+        }
+
+        #logo {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+
+        #searchContainer {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #searchInput {
+            width: 80%;
+            max-width: 600px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #999999;
+        }
+
+        #pdfList {
+            list-style-type: none;
+            padding: 0;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: white;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        #pdfList li {
+            padding: 5px 10px;
+        }
+
+        #pdfList a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        #pdfList a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <script>
+        function searchPDF() {
+            let query = document.getElementById("searchInput").value.toLowerCase().trim();
+            let links = document.querySelectorAll("#pdfList li");
+            let hasResults = false;
+
+            if (query === "") {
+                document.getElementById("pdfList").style.display = "none";
+                return;
+            }
+
+            links.forEach(li => {
+                if (li.textContent.toLowerCase().includes(query)) {
+                    li.style.display = "";
+                    hasResults = true;
+                } else {
+                    li.style.display = "none";
+                }
+            });
+
+            document.getElementById("pdfList").style.display = hasResults ? "block" : "none";
+        }
+
+        function loadPDFList() {
+            fetch("liste_pdfs.txt?" + new Date().getTime()) // Ajoute un timestamp pour forcer le rechargement
+                .then(response => response.text())
+                .then(data => {
+                    let pdfList = document.getElementById("pdfList");
+                    pdfList.innerHTML = ""; // Vide la liste avant de la remplir
+                    let lines = data.split("\n");
+
+                    lines.forEach(line => {
+                        if (line.trim() !== "") {
+                            let pdfPath = "http://192.168.107.13:8000/" + line.trim();
+                            let fileName = line.split("/").pop();
+
+                            let li = document.createElement("li");
+                            let a = document.createElement("a");
+                            a.href = pdfPath;
+                            a.textContent = fileName;
+                            a.target = "_blank";
+
+                            li.appendChild(a);
+                            pdfList.appendChild(li);
+                        }
+                    });
+                })
+                .catch(error => console.error("Erreur lors du chargement du fichier:", error));
+        }
+
+        window.onload = loadPDFList;
+        document.getElementById("searchInput").addEventListener("focus", loadPDFList); // Recharge la liste à chaque focus sur l'input
+    </script>
+</head>
+
+<body>
+    <div id="content">
+        <img src="logo.png" alt="Logo" id="logo">
+        <div id="searchContainer">
+            <input type="text" id="searchInput" placeholder="Rechercher un PDF..." onkeyup="searchPDF()">
+        </div>
+        <h2 id="title">Mode opératoire Produits</h2>
+        <ul id="pdfList"></ul>
+    </div>
+</body>
+</html>
